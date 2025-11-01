@@ -21,6 +21,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            touch-action: manipulation;
         }
 
         .game-container {
@@ -140,6 +141,7 @@
             display: none;
             border: 2px solid #FFD700;
             box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            z-index: 1000;
         }
 
         .game-over h2 {
@@ -171,6 +173,120 @@
             font-size: 18px;
             margin: 10px 0;
             animation: glow 1s ease-in-out infinite alternate;
+        }
+
+        /* 手机控制按钮样式 */
+        .mobile-controls {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            flex-direction: column;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .control-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .control-btn {
+            padding: 15px 25px;
+            background: #4CAF50;
+            border: none;
+            color: white;
+            border-radius: 10px;
+            font-size: 18px;
+            min-width: 70px;
+            cursor: pointer;
+            touch-action: manipulation;
+            user-select: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-btn:active {
+            background: #45a049;
+            transform: scale(0.95);
+        }
+
+        .control-btn.rotate {
+            background: #3498db;
+        }
+
+        .control-btn.rotate:active {
+            background: #2980b9;
+        }
+
+        .control-btn.drop {
+            background: #e74c3c;
+        }
+
+        .control-btn.drop:active {
+            background: #c0392b;
+        }
+
+        /* 手机样式调整 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                align-items: flex-start;
+                min-height: 100vh;
+            }
+
+            .game-container {
+                flex-direction: column;
+                padding: 10px;
+                gap: 15px;
+                width: 100%;
+                max-width: 400px;
+            }
+
+            .game-board {
+                width: 100%;
+                max-width: 300px;
+                height: 500px;
+                margin: 0 auto;
+            }
+
+            .info-panel {
+                width: 100%;
+                max-width: 300px;
+                margin: 0 auto;
+                padding: 15px;
+            }
+
+            .mobile-controls {
+                display: flex;
+            }
+
+            .game-over {
+                width: 90%;
+                max-width: 300px;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-board {
+                height: 450px;
+            }
+
+            .control-btn {
+                padding: 12px 20px;
+                font-size: 16px;
+                min-width: 60px;
+            }
+
+            .control-row {
+                gap: 10px;
+            }
         }
 
         @keyframes glow {
@@ -215,7 +331,23 @@
                 <p>↑ : 旋转方块</p>
                 <p>↓ : 加速下落</p>
                 <p>空格 : 直接落下</p>
+                <p style="margin-top: 10px; color: #4CAF50;">📱 手机支持触摸控制</p>
             </div>
+        </div>
+    </div>
+
+    <!-- 手机控制按钮 -->
+    <div class="mobile-controls" id="mobileControls">
+        <div class="control-row">
+            <button class="control-btn rotate" id="rotateBtn">旋转</button>
+        </div>
+        <div class="control-row">
+            <button class="control-btn" id="leftBtn">←</button>
+            <button class="control-btn" id="downBtn">↓</button>
+            <button class="control-btn" id="rightBtn">→</button>
+        </div>
+        <div class="control-row">
+            <button class="control-btn drop" id="dropBtn">直接落下</button>
         </div>
     </div>
 
@@ -280,6 +412,8 @@
             loadHighScore();
             initGame();
             setupKeyboardControls();
+            setupTouchControls();
+            setupMobileButtons();
         });
 
         function initGame() {
@@ -565,6 +699,102 @@
             });
         }
 
+        // 设置触摸控制
+        function setupTouchControls() {
+            const gameContainer = $('.game-container');
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let touchMoved = false;
+            
+            gameContainer.on('touchstart', function(e) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                touchMoved = false;
+                e.preventDefault();
+            });
+            
+            gameContainer.on('touchmove', function(e) {
+                touchMoved = true;
+                e.preventDefault();
+            });
+            
+            gameContainer.on('touchend', function(e) {
+                if (isGameOver || !touchMoved) return;
+                
+                const touchEndX = e.changedTouches[0].clientX;
+                const touchEndY = e.changedTouches[0].clientY;
+                const deltaX = touchEndX - touchStartX;
+                const deltaY = touchEndY - touchStartY;
+                const minSwipeDistance = 30;
+                
+                if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                    // 水平滑动
+                    if (Math.abs(deltaX) > minSwipeDistance) {
+                        if (deltaX > 0) {
+                            movePiece(1, 0); // 右滑
+                        } else {
+                            movePiece(-1, 0); // 左滑
+                        }
+                    }
+                } else {
+                    // 垂直滑动
+                    if (Math.abs(deltaY) > minSwipeDistance) {
+                        if (deltaY > 0) {
+                            movePiece(0, 1); // 下滑
+                        } else {
+                            rotatePiece(); // 上滑旋转
+                        }
+                    }
+                }
+                e.preventDefault();
+            });
+            
+            // 双击快速下落
+            let lastTap = 0;
+            gameContainer.on('touchend', function(e) {
+                if (touchMoved) return;
+                
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+                if (tapLength < 500 && tapLength > 0) {
+                    // 双击 - 快速下落
+                    while (movePiece(0, 1)) { }
+                    lockPiece();
+                    e.preventDefault();
+                }
+                lastTap = currentTime;
+            });
+        }
+
+        // 设置手机按钮控制
+        function setupMobileButtons() {
+            $('#rotateBtn').on('touchstart', function(e) {
+                rotatePiece();
+                e.preventDefault();
+            });
+            
+            $('#leftBtn').on('touchstart', function(e) {
+                movePiece(-1, 0);
+                e.preventDefault();
+            });
+            
+            $('#rightBtn').on('touchstart', function(e) {
+                movePiece(1, 0);
+                e.preventDefault();
+            });
+            
+            $('#downBtn').on('touchstart', function(e) {
+                movePiece(0, 1);
+                e.preventDefault();
+            });
+            
+            $('#dropBtn').on('touchstart', function(e) {
+                while (movePiece(0, 1)) { }
+                lockPiece();
+                e.preventDefault();
+            });
+        }
+
         // 重新开始游戏
         $('#restartBtn').on('click', function() {
             restartGame();
@@ -587,8 +817,9 @@
             // 重新初始化游戏
             initGame();
             
-            // 确保键盘控制重新设置
+            // 确保控制重新设置
             setupKeyboardControls();
+            setupTouchControls();
         }
     </script>
 </body>
