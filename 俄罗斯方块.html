@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>俄罗斯方块</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .game-board {
+            width: 300px;
+            height: 600px;
+            background: #000;
+            border: 2px solid #333;
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(20, 1fr);
+            gap: 1px;
+        }
+
+        .cell {
+            background: #111;
+            border: 1px solid #222;
+        }
+
+        .info-panel {
+            width: 180px;
+            padding: 20px;
+            background: #222;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .score-section {
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .score-section h3 {
+            margin-bottom: 10px;
+            color: #4CAF50;
+            font-size: 16px;
+        }
+
+        .score-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .high-score {
+            color: #FFD700 !important;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+
+        .next-piece {
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .next-piece h3 {
+            margin-bottom: 15px;
+            color: #3498db;
+            font-size: 16px;
+        }
+
+        .next-board-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 120px;
+        }
+
+        .next-board {
+            width: 120px;
+            height: 120px;
+            background: #111;
+            border: 2px solid #444;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 1px;
+            position: relative;
+        }
+
+        .controls {
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #ccc;
+            line-height: 1.4;
+        }
+
+        .controls h3 {
+            margin-bottom: 10px;
+            color: #e74c3c;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+            border: 2px solid #FFD700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .game-over h2 {
+            color: #FFD700;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .restart-btn {
+            margin-top: 15px;
+            padding: 12px 25px;
+            background: #4CAF50;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        .new-record {
+            color: #FFD700;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 10px 0;
+            animation: glow 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 5px #FFD700;
+            }
+            to {
+                text-shadow: 0 0 10px #FFD700, 0 0 15px #FFD700;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <div class="game-board" id="gameBoard">
+            <!-- 游戏网格将通过JS生成 -->
+        </div>
+        <div class="info-panel">
+            <div class="score-section">
+                <h3>当前分数</h3>
+                <div id="score" class="score-value">0</div>
+            </div>
+            
+            <div class="score-section">
+                <h3>历史最高</h3>
+                <div id="highScore" class="score-value high-score">0</div>
+            </div>
+            
+            <div class="next-piece">
+                <h3>下一个方块</h3>
+                <div class="next-board-container">
+                    <div class="next-board" id="nextBoard">
+                        <!-- 下一个方块预览 -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <h3>操作说明</h3>
+                <p>← → : 左右移动</p>
+                <p>↑ : 旋转方块</p>
+                <p>↓ : 加速下落</p>
+                <p>空格 : 直接落下</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-over" id="gameOver">
+        <h2>游戏结束!</h2>
+        <p>本次分数: <span id="finalScore">0</span></p>
+        <p>历史最高: <span id="finalHighScore">0</span></p>
+        <div id="newRecordMessage" class="new-record" style="display: none;">
+            🎉 新纪录! 🎉
+        </div>
+        <button class="restart-btn" id="restartBtn">重新开始</button>
+    </div>
+
+    <script>
+        // 游戏配置和状态
+        const COLS = 10;
+        const ROWS = 20;
+        const SHAPES = [
+            { shape: [[1, 1, 1, 1]], color: 'cyan' },
+            { shape: [[1, 1], [1, 1]], color: 'yellow' },
+            { shape: [[0, 1, 0], [1, 1, 1]], color: 'purple' },
+            { shape: [[0, 1, 1], [1, 1, 0]], color: 'green' },
+            { shape: [[1, 1, 0], [0, 1, 1]], color: 'red' },
+            { shape: [[1, 0, 0], [1, 1, 1]], color: 'blue' },
+            { shape: [[0, 0, 1], [1, 1, 1]], color: 'orange' }
+        ];
+
+        let score = 0;
+        let highScore = 0;
+        let gameBoard = [];
+        let currentPiece = null;
+        let nextPiece = null;
+        let gameInterval = null;
+        let isGameOver = false;
+
+        // 从本地存储加载最高分
+        function loadHighScore() {
+            const savedHighScore = localStorage.getItem('tetrisHighScore');
+            highScore = savedHighScore ? parseInt(savedHighScore) : 0;
+            $('#highScore').text(highScore);
+            $('#finalHighScore').text(highScore);
+        }
+
+        // 保存最高分到本地存储
+        function saveHighScore() {
+            localStorage.setItem('tetrisHighScore', highScore.toString());
+        }
+
+        // 检查并更新最高分
+        function updateHighScore() {
+            if (score > highScore) {
+                highScore = score;
+                $('#highScore').text(highScore);
+                $('#finalHighScore').text(highScore);
+                saveHighScore();
+                return true; // 返回true表示创造了新纪录
+            }
+            return false;
+        }
+
+        $(function () {
+            loadHighScore();
+            initGame();
+            setupKeyboardControls();
+        });
+
+        function initGame() {
+            createGameBoard();
+            initBoardArray();
+            generateNewPiece();
+            startGameLoop();
+            $('#score').text(score);
+            $('#gameOver').hide();
+            $('#newRecordMessage').hide();
+        }
+
+        function createGameBoard() {
+            const gameBoard = $('#gameBoard');
+            gameBoard.empty();
+            
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    const cell = $('<div>').addClass('cell');
+                    gameBoard.append(cell);
+                }
+            }
+        }
+
+        function initBoardArray() {
+            gameBoard = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+        }
+
+        function generateNewPiece() {
+            if (nextPiece) {
+                currentPiece = {
+                    shape: nextPiece.shape,
+                    color: nextPiece.color,
+                    x: Math.floor(COLS / 2) - Math.floor(nextPiece.shape[0].length / 2),
+                    y: 0
+                };
+            } else {
+                const randomShape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+                currentPiece = {
+                    shape: randomShape.shape,
+                    color: randomShape.color,
+                    x: Math.floor(COLS / 2) - Math.floor(randomShape.shape[0].length / 2),
+                    y: 0
+                };
+            }
+
+            // 生成下一个方块
+            const randomShape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+            nextPiece = {
+                shape: randomShape.shape,
+                color: randomShape.color
+            };
+
+            updateNextPieceDisplay();
+            
+            // 检查游戏是否结束
+            if (checkCollision(currentPiece)) {
+                gameOver();
+            }
+            
+            drawGame();
+        }
+
+        function updateNextPieceDisplay() {
+            const nextBoard = $('#nextBoard');
+            nextBoard.empty();
+
+            // 创建4x4的预览网格
+            for (let row = 0; row < 4; row++) {
+                for (let col = 0; col < 4; col++) {
+                    const cell = $('<div>').addClass('cell');
+                    nextBoard.append(cell);
+                }
+            }
+
+            if (nextPiece && nextPiece.shape) {
+                const shape = nextPiece.shape;
+                const shapeRows = shape.length;
+                const shapeCols = shape[0].length;
+                
+                // 计算居中偏移量
+                const offsetX = Math.floor((4 - shapeCols) / 2);
+                const offsetY = Math.floor((4 - shapeRows) / 2);
+                
+                // 显示下一个方块（居中显示）
+                shape.forEach((row, rowIndex) => {
+                    row.forEach((value, colIndex) => {
+                        if (value) {
+                            const displayRow = offsetY + rowIndex;
+                            const displayCol = offsetX + colIndex;
+                            const cellIndex = displayRow * 4 + displayCol;
+                            if (cellIndex >= 0 && cellIndex < 16) {
+                                nextBoard.children().eq(cellIndex).css('background-color', nextPiece.color);
+                            }
+                        }
+                    });
+                });
+            }
+        }
+
+        function drawGame() {
+            // 清空游戏板
+            $('#gameBoard .cell').css('background-color', '#111');
+
+            // 绘制已固定的方块
+            gameBoard.forEach((row, rowIndex) => {
+                row.forEach((value, colIndex) => {
+                    if (value) {
+                        const cellIndex = rowIndex * COLS + colIndex;
+                        $('#gameBoard .cell').eq(cellIndex).css('background-color', value);
+                    }
+                });
+            });
+
+            // 绘制当前方块
+            if (currentPiece) {
+                currentPiece.shape.forEach((row, rowIndex) => {
+                    row.forEach((value, colIndex) => {
+                        if (value) {
+                            const boardRow = currentPiece.y + rowIndex;
+                            const boardCol = currentPiece.x + colIndex;
+                            if (boardRow >= 0 && boardRow < ROWS && boardCol >= 0 && boardCol < COLS) {
+                                const cellIndex = boardRow * COLS + boardCol;
+                                $('#gameBoard .cell').eq(cellIndex).css('background-color', currentPiece.color);
+                            }
+                        }
+                    });
+                });
+            }
+        }
+
+        function checkCollision(piece, offsetX = 0, offsetY = 0) {
+            return piece.shape.some((row, rowIndex) => {
+                return row.some((value, colIndex) => {
+                    if (value) {
+                        const newX = piece.x + colIndex + offsetX;
+                        const newY = piece.y + rowIndex + offsetY;
+                        
+                        if (newX < 0 || newX >= COLS || newY >= ROWS) {
+                            return true;
+                        }
+                        
+                        if (newY >= 0 && gameBoard[newY][newX]) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+            });
+        }
+
+        function movePiece(dx, dy) {
+            if (!currentPiece || isGameOver) return false;
+
+            if (!checkCollision(currentPiece, dx, dy)) {
+                currentPiece.x += dx;
+                currentPiece.y += dy;
+                drawGame();
+                return true;
+            }
+            return false;
+        }
+
+        function rotatePiece() {
+            if (!currentPiece || isGameOver) return;
+
+            const rotated = [];
+            const rows = currentPiece.shape.length;
+            const cols = currentPiece.shape[0].length;
+
+            for (let col = 0; col < cols; col++) {
+                rotated[col] = [];
+                for (let row = rows - 1; row >= 0; row--) {
+                    rotated[col][rows - 1 - row] = currentPiece.shape[row][col];
+                }
+            }
+
+            const originalShape = currentPiece.shape;
+            currentPiece.shape = rotated;
+
+            if (checkCollision(currentPiece)) {
+                currentPiece.shape = originalShape;
+            } else {
+                drawGame();
+            }
+        }
+
+        function lockPiece() {
+            currentPiece.shape.forEach((row, rowIndex) => {
+                row.forEach((value, colIndex) => {
+                    if (value) {
+                        const boardRow = currentPiece.y + rowIndex;
+                        const boardCol = currentPiece.x + colIndex;
+                        if (boardRow >= 0 && boardRow < ROWS && boardCol >= 0 && boardCol < COLS) {
+                            gameBoard[boardRow][boardCol] = currentPiece.color;
+                        }
+                    }
+                });
+            });
+
+            checkLines();
+            generateNewPiece();
+        }
+
+        function checkLines() {
+            let linesCleared = 0;
+
+            for (let row = ROWS - 1; row >= 0; row--) {
+                if (gameBoard[row].every(cell => cell !== 0)) {
+                    gameBoard.splice(row, 1);
+                    gameBoard.unshift(Array(COLS).fill(0));
+                    linesCleared++;
+                    row++;
+                }
+            }
+
+            if (linesCleared > 0) {
+                score += linesCleared * 100;
+                $('#score').text(score);
+            }
+        }
+
+        function gameLoop() {
+            if (isGameOver) return;
+
+            if (!currentPiece) {
+                generateNewPiece();
+                return;
+            }
+
+            if (!movePiece(0, 1)) {
+                lockPiece();
+            }
+        }
+
+        function startGameLoop() {
+            if (gameInterval) clearInterval(gameInterval);
+            gameInterval = setInterval(gameLoop, 500);
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            clearInterval(gameInterval);
+            $('#finalScore').text(score);
+            
+            // 检查是否创造新纪录
+            const isNewRecord = updateHighScore();
+            if (isNewRecord) {
+                $('#newRecordMessage').show();
+            } else {
+                $('#newRecordMessage').hide();
+            }
+            
+            $('#gameOver').show();
+        }
+
+        function setupKeyboardControls() {
+            // 移除之前可能存在的键盘事件监听器
+            $(window).off('keydown.tetris');
+            
+            // 添加新的键盘事件监听器
+            $(window).on('keydown.tetris', function (e) {
+                if (isGameOver) return;
+
+                switch (e.keyCode) {
+                    case 37: // 左箭头
+                        movePiece(-1, 0);
+                        break;
+                    case 39: // 右箭头
+                        movePiece(1, 0);
+                        break;
+                    case 40: // 下箭头
+                        movePiece(0, 1);
+                        break;
+                    case 38: // 上箭头
+                        rotatePiece();
+                        break;
+                    case 32: // 空格键
+                        while (movePiece(0, 1)) { }
+                        lockPiece();
+                        break;
+                }
+            });
+        }
+
+        // 重新开始游戏
+        $('#restartBtn').on('click', function() {
+            restartGame();
+        });
+
+        function restartGame() {
+            // 重置游戏状态
+            score = 0;
+            gameBoard = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+            currentPiece = null;
+            nextPiece = null;
+            isGameOver = false;
+            
+            // 清除之前的游戏循环
+            if (gameInterval) {
+                clearInterval(gameInterval);
+                gameInterval = null;
+            }
+            
+            // 重新初始化游戏
+            initGame();
+            
+            // 确保键盘控制重新设置
+            setupKeyboardControls();
+        }
+    </script>
+</body>
+
+</html>
