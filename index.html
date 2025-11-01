@@ -24,22 +24,23 @@
             min-height: 100vh;
             touch-action: manipulation;
             overflow: hidden;
+            padding: 10px;
         }
 
         .game-wrapper {
             width: 100%;
             max-width: 800px;
-            padding: 10px;
             position: relative;
         }
 
         .game-header {
             text-align: center;
             margin-bottom: 15px;
+            padding-top: 10px;
         }
 
         .game-title {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
             color: #FFD700;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
@@ -47,7 +48,7 @@
         }
 
         .game-subtitle {
-            font-size: 14px;
+            font-size: 12px;
             color: #ccc;
             opacity: 0.8;
         }
@@ -131,25 +132,27 @@
             text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
         }
 
-        /* 手机端分数显示 */
+        /* 手机端分数显示 - 调整位置 */
         .mobile-scores {
             display: none;
             position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
+            top: -50px; /* 移到标题上方 */
+            left: 50%;
+            transform: translateX(-50%);
             background: rgba(40, 40, 60, 0.9);
-            padding: 10px 15px;
+            padding: 8px 20px;
             border-radius: 12px;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             z-index: 50;
+            min-width: 200px;
         }
 
         .mobile-score-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 30px;
         }
 
         .mobile-score-item {
@@ -158,13 +161,13 @@
         }
 
         .mobile-score-label {
-            font-size: 12px;
+            font-size: 11px;
             color: #ccc;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .mobile-score-value {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             color: white;
         }
@@ -278,74 +281,76 @@
             animation: glow 1s ease-in-out infinite alternate;
         }
 
-        /* 手机控制按钮样式 - 更透明 */
+        /* 手机控制按钮样式 - 调整位置确保不遮挡游戏区域 */
         .mobile-controls {
             display: none;
             position: fixed;
             bottom: 10px;
             left: 10px;
             right: 10px;
-            padding: 10px;
-            background: rgba(15, 15, 25, 0.6); /* 更透明 */
+            padding: 8px;
+            background: rgba(15, 15, 25, 0.7);
             backdrop-filter: blur(20px);
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
             z-index: 100;
-            border-radius: 16px;
+            border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+            max-height: 140px; /* 限制高度 */
         }
 
         .control-row {
             display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .control-btn {
-            padding: 14px 18px;
-            background: rgba(76, 175, 80, 0.8);
+            padding: 12px 16px;
+            background: rgba(76, 175, 80, 0.85);
             border: none;
             color: white;
             border-radius: 10px;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
-            min-width: 55px;
+            min-width: 50px;
             cursor: pointer;
             touch-action: manipulation;
             user-select: none;
             transition: all 0.15s ease;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            flex: 1;
         }
 
         .control-btn:active {
             transform: scale(0.92);
-            background: rgba(76, 175, 80, 0.9);
+            background: rgba(76, 175, 80, 0.95);
         }
 
         .control-btn.rotate {
-            background: rgba(52, 152, 219, 0.8);
+            background: rgba(52, 152, 219, 0.85);
         }
 
         .control-btn.rotate:active {
-            background: rgba(52, 152, 219, 0.9);
+            background: rgba(52, 152, 219, 0.95);
         }
 
         .control-btn.drop {
-            background: rgba(231, 76, 60, 0.8);
+            background: rgba(231, 76, 60, 0.85);
         }
 
         .control-btn.drop:active {
-            background: rgba(231, 76, 60, 0.9);
+            background: rgba(231, 76, 60, 0.95);
         }
 
         .control-btn.direction {
-            background: rgba(155, 89, 182, 0.8);
+            background: rgba(155, 89, 182, 0.85);
         }
 
         .control-btn.direction:active {
-            background: rgba(155, 89, 182, 0.9);
+            background: rgba(155, 89, 182, 0.95);
         }
 
         /* 手机样式调整 */
@@ -355,6 +360,7 @@
                 align-items: flex-start;
                 min-height: 100vh;
                 overflow: auto;
+                padding-bottom: 160px; /* 为底部控制栏留出空间 */
             }
 
             .game-wrapper {
@@ -362,15 +368,16 @@
             }
 
             .game-header {
-                margin-bottom: 60px; /* 为顶部分数留出空间 */
+                margin-bottom: 70px; /* 为顶部分数留出空间 */
+                padding-top: 40px;
             }
 
             .game-title {
-                font-size: 24px;
+                font-size: 22px;
             }
 
             .game-subtitle {
-                font-size: 12px;
+                font-size: 11px;
             }
 
             .game-container {
@@ -390,11 +397,11 @@
             }
 
             .info-panel {
-                display: none; /* 手机端隐藏右侧信息面板 */
+                display: none;
             }
 
             .mobile-scores {
-                display: block; /* 显示顶部分数 */
+                display: block;
             }
 
             .mobile-controls {
@@ -414,17 +421,26 @@
             }
 
             .mobile-scores {
-                padding: 8px 12px;
+                padding: 6px 15px;
+                min-width: 180px;
+            }
+
+            .mobile-score-row {
+                gap: 20px;
             }
 
             .mobile-score-value {
-                font-size: 18px;
+                font-size: 16px;
             }
 
             .control-btn {
-                padding: 12px 16px;
-                font-size: 14px;
-                min-width: 50px;
+                padding: 10px 14px;
+                font-size: 13px;
+                min-width: 45px;
+            }
+
+            body {
+                padding-bottom: 150px;
             }
         }
 
@@ -435,21 +451,37 @@
             }
 
             .control-btn {
-                padding: 10px 14px;
-                font-size: 13px;
-                min-width: 45px;
+                padding: 8px 12px;
+                font-size: 12px;
+                min-width: 40px;
             }
 
             .mobile-scores {
-                padding: 6px 10px;
+                padding: 5px 12px;
+                min-width: 160px;
             }
 
             .mobile-score-value {
-                font-size: 16px;
+                font-size: 14px;
+            }
+
+            .mobile-score-label {
+                font-size: 10px;
+            }
+
+            body {
+                padding-bottom: 140px;
             }
         }
 
-        /* 动画效果 - 简化消除动画避免残影 */
+        /* 确保游戏区域在安全区域内 */
+        @supports (padding: max(0px)) {
+            .mobile-controls {
+                padding-bottom: max(8px, env(safe-area-inset-bottom));
+            }
+        }
+
+        /* 动画效果 */
         @keyframes glow {
             from {
                 text-shadow: 0 0 5px #FFD700;
@@ -463,29 +495,11 @@
             background-color: white !important;
             transition: background-color 0.2s ease;
         }
-
-        /* 触摸提示 */
-        .touch-hint {
-            position: absolute;
-            bottom: 80px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 12px;
-            padding: 10px;
-            display: none;
-        }
     </style>
 </head>
 
 <body>
     <div class="game-wrapper">
-        <div class="game-header">
-            <div class="game-title">俄罗斯方块</div>
-            <div class="game-subtitle">经典益智游戏 - 手机电脑都能玩</div>
-        </div>
-
         <!-- 手机端顶部分数显示 -->
         <div class="mobile-scores" id="mobileScores">
             <div class="mobile-score-row">
@@ -500,12 +514,16 @@
             </div>
         </div>
 
+        <div class="game-header">
+            <div class="game-title">俄罗斯方块</div>
+            <div class="game-subtitle">经典益智游戏 - 手机电脑都能玩</div>
+        </div>
+
         <div class="game-container">
             <div class="main-game-area">
                 <div class="game-board" id="gameBoard">
                     <!-- 游戏网格将通过JS生成 -->
                 </div>
-                <div class="touch-hint" id="touchHint">💡 提示：滑动控制移动，双击快速落下</div>
             </div>
             
             <div class="info-panel">
@@ -621,14 +639,6 @@
             setupKeyboardControls();
             setupTouchControls();
             setupMobileButtons();
-            
-            // 显示触摸提示（仅手机端）
-            if (isMobile) {
-                $('#touchHint').show();
-                setTimeout(() => {
-                    $('#touchHint').fadeOut(1000);
-                }, 3000);
-            }
         });
 
         function initGame() {
@@ -732,7 +742,7 @@
         }
 
         function drawGame() {
-            // 清空游戏板 - 简化绘制逻辑避免残影
+            // 清空游戏板
             $('#gameBoard .cell').each(function() {
                 $(this).css('background-color', '#0a0a0a');
             });
@@ -849,7 +859,6 @@
             }
 
             if (linesCleared > 0) {
-                // 简化消除动画，避免复杂动画导致残影
                 linesToClear.forEach(row => {
                     for (let col = 0; col < COLS; col++) {
                         const cellIndex = row * COLS + col;
@@ -858,13 +867,11 @@
                 });
 
                 setTimeout(() => {
-                    // 实际消除行
                     linesToClear.forEach(row => {
                         gameBoard.splice(row, 1);
                         gameBoard.unshift(Array(COLS).fill(0));
                     });
                     
-                    // 更新分数
                     const points = linesCleared * 100 * linesCleared;
                     score += points;
                     $('#score').text(score);
