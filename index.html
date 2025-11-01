@@ -51,6 +51,7 @@
             font-size: 12px;
             color: #ccc;
             opacity: 0.8;
+            margin-bottom: 15px;
         }
 
         .game-container {
@@ -132,27 +133,24 @@
             text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
         }
 
-        /* 手机端分数显示 - 调整位置 */
+        /* 手机端分数显示 - 放在标题下方 */
         .mobile-scores {
             display: none;
-            position: absolute;
-            top: -50px; /* 移到标题上方 */
-            left: 50%;
-            transform: translateX(-50%);
             background: rgba(40, 40, 60, 0.9);
-            padding: 8px 20px;
+            padding: 10px 20px;
             border-radius: 12px;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             z-index: 50;
-            min-width: 200px;
+            margin: 0 auto 15px auto;
+            max-width: 280px;
         }
 
         .mobile-score-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 30px;
+            gap: 40px;
         }
 
         .mobile-score-item {
@@ -161,13 +159,13 @@
         }
 
         .mobile-score-label {
-            font-size: 11px;
+            font-size: 12px;
             color: #ccc;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
 
         .mobile-score-value {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
             color: white;
         }
@@ -281,7 +279,7 @@
             animation: glow 1s ease-in-out infinite alternate;
         }
 
-        /* 手机控制按钮样式 - 调整位置确保不遮挡游戏区域 */
+        /* 手机控制按钮样式 */
         .mobile-controls {
             display: none;
             position: fixed;
@@ -297,7 +295,7 @@
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-            max-height: 140px; /* 限制高度 */
+            max-height: 140px;
         }
 
         .control-row {
@@ -360,7 +358,7 @@
                 align-items: flex-start;
                 min-height: 100vh;
                 overflow: auto;
-                padding-bottom: 160px; /* 为底部控制栏留出空间 */
+                padding-bottom: 160px;
             }
 
             .game-wrapper {
@@ -368,8 +366,8 @@
             }
 
             .game-header {
-                margin-bottom: 70px; /* 为顶部分数留出空间 */
-                padding-top: 40px;
+                margin-bottom: 15px;
+                padding-top: 10px;
             }
 
             .game-title {
@@ -378,6 +376,7 @@
 
             .game-subtitle {
                 font-size: 11px;
+                margin-bottom: 10px;
             }
 
             .game-container {
@@ -421,16 +420,16 @@
             }
 
             .mobile-scores {
-                padding: 6px 15px;
-                min-width: 180px;
+                padding: 8px 16px;
+                max-width: 260px;
             }
 
             .mobile-score-row {
-                gap: 20px;
+                gap: 30px;
             }
 
             .mobile-score-value {
-                font-size: 16px;
+                font-size: 18px;
             }
 
             .control-btn {
@@ -457,27 +456,20 @@
             }
 
             .mobile-scores {
-                padding: 5px 12px;
-                min-width: 160px;
+                padding: 6px 12px;
+                max-width: 240px;
             }
 
             .mobile-score-value {
-                font-size: 14px;
+                font-size: 16px;
             }
 
             .mobile-score-label {
-                font-size: 10px;
+                font-size: 11px;
             }
 
             body {
                 padding-bottom: 140px;
-            }
-        }
-
-        /* 确保游戏区域在安全区域内 */
-        @supports (padding: max(0px)) {
-            .mobile-controls {
-                padding-bottom: max(8px, env(safe-area-inset-bottom));
             }
         }
 
@@ -500,23 +492,23 @@
 
 <body>
     <div class="game-wrapper">
-        <!-- 手机端顶部分数显示 -->
-        <div class="mobile-scores" id="mobileScores">
-            <div class="mobile-score-row">
-                <div class="mobile-score-item">
-                    <div class="mobile-score-label">当前分数</div>
-                    <div id="mobileScore" class="mobile-score-value">0</div>
-                </div>
-                <div class="mobile-score-item">
-                    <div class="mobile-score-label">历史最高</div>
-                    <div id="mobileHighScore" class="mobile-score-value mobile-high-score">0</div>
-                </div>
-            </div>
-        </div>
-
         <div class="game-header">
             <div class="game-title">俄罗斯方块</div>
             <div class="game-subtitle">经典益智游戏 - 手机电脑都能玩</div>
+            
+            <!-- 手机端分数显示 - 现在在标题下方 -->
+            <div class="mobile-scores" id="mobileScores">
+                <div class="mobile-score-row">
+                    <div class="mobile-score-item">
+                        <div class="mobile-score-label">当前分数</div>
+                        <div id="mobileScore" class="mobile-score-value">0</div>
+                    </div>
+                    <div class="mobile-score-item">
+                        <div class="mobile-score-label">历史最高</div>
+                        <div id="mobileHighScore" class="mobile-score-value mobile-high-score">0</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="game-container">
@@ -605,6 +597,7 @@
         let gameInterval = null;
         let isGameOver = false;
         let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        let isDoubleTapProcessing = false; // 防止双击重复处理
 
         // 从本地存储加载最高分
         function loadHighScore() {
@@ -949,6 +942,7 @@
             let touchStartX = 0;
             let touchStartY = 0;
             let lastTapTime = 0;
+            let tapCount = 0;
             
             gameContainer.on('touchstart', function(e) {
                 touchStartX = e.touches[0].clientX;
@@ -961,7 +955,7 @@
             });
             
             gameContainer.on('touchend', function(e) {
-                if (isGameOver) return;
+                if (isGameOver || isDoubleTapProcessing) return;
                 
                 const touchEndX = e.changedTouches[0].clientX;
                 const touchEndY = e.changedTouches[0].clientY;
@@ -969,17 +963,35 @@
                 const deltaY = touchEndY - touchStartY;
                 const minSwipeDistance = 20;
                 
-                // 双击检测
+                // 双击检测 - 修复版本
                 const currentTime = new Date().getTime();
-                if (currentTime - lastTapTime < 300) {
-                    while (movePiece(0, 1)) { }
-                    lockPiece();
-                    e.preventDefault();
-                    return;
+                const timeSinceLastTap = currentTime - lastTapTime;
+                
+                if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
+                    tapCount++;
+                    if (tapCount === 2) {
+                        // 防止重复处理
+                        isDoubleTapProcessing = true;
+                        
+                        // 双击 - 快速下落
+                        while (movePiece(0, 1)) { }
+                        lockPiece();
+                        
+                        // 重置状态
+                        setTimeout(() => {
+                            isDoubleTapProcessing = false;
+                        }, 300);
+                        
+                        tapCount = 0;
+                        e.preventDefault();
+                        return;
+                    }
+                } else {
+                    tapCount = 1;
                 }
                 lastTapTime = currentTime;
                 
-                // 滑动检测
+                // 滑动检测（如果不是双击）
                 if (Math.abs(deltaX) > Math.abs(deltaY)) {
                     if (Math.abs(deltaX) > minSwipeDistance) {
                         if (deltaX > 0) {
@@ -1040,6 +1052,7 @@
             currentPiece = null;
             nextPiece = null;
             isGameOver = false;
+            isDoubleTapProcessing = false;
             
             if (gameInterval) {
                 clearInterval(gameInterval);
